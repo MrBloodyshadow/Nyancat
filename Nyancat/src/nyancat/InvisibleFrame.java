@@ -4,7 +4,8 @@ import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Dialog.ModalExclusionType;
 import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import javax.swing.JWindow;
 
@@ -31,7 +32,12 @@ public class InvisibleFrame extends JWindow {
     }
 
     private Dimension getScreenSize() {
-        return DEFAULT_SIZE;
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        int width = gd.getDisplayMode().getWidth();
+        int height = gd.getDisplayMode().getHeight();
+        Dimension dimension = new Dimension(width, height);
+        return dimension;
+//        return DEFAULT_SIZE;
     }
 
     private void lockSize(Dimension screenSize) {
@@ -39,13 +45,6 @@ public class InvisibleFrame extends JWindow {
         setMaximumSize(screenSize);
         setSize(screenSize);
         setPreferredSize(screenSize);
-    }
-
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-        g.setColor(Color.red);
-        g.drawLine(0, 0, 1000, 1000);
     }
 
 }
