@@ -21,9 +21,10 @@ class Pixel {
     private final Shape shape;
     private final Color color;
 
-    public Pixel(float x, float y, float w, float h, int c) {
+    public Pixel(float x, float y, float w, float h, int hexColor, int a) {
         shape = new Rectangle2D.Float(x, y, w, h);
-        this.color = hexToColor(c);
+        Color c = hexToColor(hexColor);
+        this.color = new Color(c.getRed(), c.getGreen(), c.getBlue(), a);
     }
 
     public void paint(Graphics2D g2) {

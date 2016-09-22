@@ -18,8 +18,8 @@ class Mesh {
         pixels.add(pixel);
     }
 
-    public void add(float x, float y, float w, float h, int c) {
-        Pixel p = new Pixel(x, y, w, h, c);
+    public void add(float x, float y, float w, float h, int c, int a) {
+        Pixel p = new Pixel(x, y, w, h, c, a);
         add(p);
     }
 

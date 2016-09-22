@@ -20,7 +20,6 @@ public class InvisibleFrame extends JWindow {
     }
 
     private static final Color TRANSPARENT_COLOR = new Color(0.0f, 0.0f, 0.0f, 0.0f);
-    private static final Dimension DEFAULT_SIZE = new Dimension(250, 1000);
     private static final ModalExclusionType MODAL_MODE = Dialog.ModalExclusionType.NO_EXCLUDE;
 
     public InvisibleFrame() throws HeadlessException {
@@ -37,7 +36,11 @@ public class InvisibleFrame extends JWindow {
         int height = gd.getDisplayMode().getHeight();
         Dimension dimension = new Dimension(width, height);
         return dimension;
-//        return DEFAULT_SIZE;
+    }
+    
+    private Dimension getMultiScreenSize(){
+        //TODO
+        return null;
     }
 
     private void lockSize(Dimension screenSize) {

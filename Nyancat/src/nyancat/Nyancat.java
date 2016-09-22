@@ -1,44 +1,55 @@
 package nyancat;
 
-import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author K-
  */
 public class Nyancat {
 
-    private final float scale = 1;
     private final int numStars = 10, numRainChunks = 30;
 
+    private final Point2D.Float scale = new Point2D.Float(0.1f, 0.1f);
+    private final Point2D.Float position = new Point2D.Float(0, 10);
+    private final Point2D.Float speed = new Point2D.Float(3, 0);
     private final List<Mesh> scene = new ArrayList<Mesh>();
 
-    private Mesh poptart, face, feet, tail, rainbow, rainChunk;
+    private Mesh poptart, face, feet, tail, rainbow;
     private List<List<Mesh>> stars;
     private int frame = 0;
 
     public void paint(Graphics2D g2) {
+
+        scale.x += 0.001f;
+        scale.y += 0.001f;
+        position.x += speed.x;
+        position.y += (speed.y) / scale.y;
+
+        g2.scale(scale.x, scale.y);
+        //rotate
+        g2.translate(position.x, position.y);
+        
+
         for (Mesh mesh : scene) {
             mesh.paint(g2);
         }
     }
 
-    private void helper(Mesh o, double x, double y, double w, double h, int c) {
-        o.add((float) (x * scale), (float) (y * scale), (float) (w * scale), (float) (h * scale), c);
+    private void helper(Mesh o, double x, double y, double w, double h, int c, int a) {
+        o.add((float) (x), (float) (y), (float) (w), (float) (h), c, a);
     }
 
     private void helper(Mesh o, double x, double y, double z,
             double w, double h, double d, int c) {
-        helper(o, x, -y, w, h, c);
+        helper(o, x, -y, w, h, c, 255);
+    }
+
+    private void helper(Mesh o, double x, double y, double z,
+            double w, double h, double d, int c, int a) {
+        helper(o, x, -y, w, h, c, a);
     }
 
     public Nyancat() {
@@ -47,11 +58,10 @@ public class Nyancat {
         poptart();
         tail();
         face();
-        rain();
 //        stars();
     }
 
-    //TODO implement it for the whole screen
+    //TODO implement it for the whole screen or arround the nyancat
     private void stars() {
         stars = new ArrayList<List<Mesh>>(numStars);
         for (int state = 0; state < 6; state++) {
@@ -67,33 +77,20 @@ public class Nyancat {
         }
     }
 
-    private void rain() {
-        rainChunk = new Mesh();
-        helper(rainChunk, -16.5, 7, 0, 8, 3, 1, 0xff0000);
-        helper(rainChunk, -16.5, 4, 0, 8, 3, 1, 0xff9900);
-        helper(rainChunk, -16.5, 1, 0, 8, 3, 1, 0xffff00);
-        helper(rainChunk, -16.5, -2, 0, 8, 3, 1, 0x33ff00);
-        helper(rainChunk, -16.5, -5, 0, 8, 3, 1, 0x0099ff);
-        helper(rainChunk, -16.5, -8, 0, 8, 3, 1, 0x6633ff);
-        rainChunk.position.x -= (8 * (numRainChunks - 1));
-        scene.add(rainChunk);
-    }
-
     private void rainbow() {
         //RAINBOW
         rainbow = new Mesh();
-        for (int c = 0; c < numRainChunks - 1; c++) {
-            int yOffset = 8;
-            if (c % 2 == 1) {
-                yOffset = 7;
-            }
-            double xOffset = (-c * 8) - 16.5;
-            helper(rainbow, xOffset, yOffset, 0, 8, 3, 1, 0xff0000);
-            helper(rainbow, xOffset, yOffset - 3, 0, 8, 3, 1, 0xff9900);
-            helper(rainbow, xOffset, yOffset - 6, 0, 8, 3, 1, 0xffff00);
-            helper(rainbow, xOffset, yOffset - 9, 0, 8, 3, 1, 0x33ff00);
-            helper(rainbow, xOffset, yOffset - 12, 0, 8, 3, 1, 0x0099ff);
-            helper(rainbow, xOffset, yOffset - 15, 0, 8, 3, 1, 0x6633ff);
+        int alphaSpacing = Math.floorDiv( 255,numRainChunks);
+        for (int i = 0; i < numRainChunks - 1; i++) {
+            int alpha = alphaSpacing * (numRainChunks - i);
+            int yOffset = 8 - i % 2;
+            double xOffset = (-i * 8) - 16.5;
+            helper(rainbow, xOffset, yOffset, 0, 8, 3, 1, 0xff0000, alpha);
+            helper(rainbow, xOffset, yOffset - 3, 0, 8, 3, 1, 0xff9900, alpha);
+            helper(rainbow, xOffset, yOffset - 6, 0, 8, 3, 1, 0xffff00, alpha);
+            helper(rainbow, xOffset, yOffset - 9, 0, 8, 3, 1, 0x33ff00, alpha);
+            helper(rainbow, xOffset, yOffset - 12, 0, 8, 3, 1, 0x0099ff, alpha);
+            helper(rainbow, xOffset, yOffset - 15, 0, 8, 3, 1, 0x6633ff, alpha);
         }
         scene.add(rainbow);
 
@@ -259,6 +256,7 @@ public class Nyancat {
     }
 
     void nextFrame() {
+        final float rainbowDispalcement = 4.5f;
 
         moveStars();
         switch (frame) {
@@ -272,8 +270,7 @@ public class Nyancat {
                 feet.position.y--;
                 poptart.position.y--;
                 tail.position.y--;
-                rainbow.position.x -= 9;
-                rainChunk.position.x += (8 * (numRainChunks - 1)) - 1;
+                rainbow.position.x -= rainbowDispalcement;
                 break;
             case 2:
                 feet.position.x--;
@@ -281,8 +278,7 @@ public class Nyancat {
             case 3:
                 face.position.x--;
                 feet.position.x--;
-                rainbow.position.x += 9;
-                rainChunk.position.x -= (8 * (numRainChunks - 1)) - 1;
+                rainbow.position.x += rainbowDispalcement;
                 break;
             case 4:
                 face.position.y++;
@@ -291,8 +287,7 @@ public class Nyancat {
                 poptart.position.y++;
                 tail.position.y++;
                 feet.position.y++;
-                rainbow.position.x -= 9;
-                rainChunk.position.x += (8 * (numRainChunks - 1)) - 1;
+                rainbow.position.x -= rainbowDispalcement;
                 break;
             case 6://8th frame
                 face.position.x++;
@@ -304,8 +299,7 @@ public class Nyancat {
                 face.position.y--;
                 feet.position.x++;
                 feet.position.y--;
-                rainbow.position.x += 9;
-                rainChunk.position.x -= (8 * (numRainChunks - 1)) - 1;
+                rainbow.position.x += rainbowDispalcement;
                 break;
             case 8:
                 feet.position.x--;
@@ -313,8 +307,7 @@ public class Nyancat {
             case 9:
                 face.position.x--;
                 feet.position.x--;
-                rainbow.position.x -= 9;
-                rainChunk.position.x += (8 * (numRainChunks - 1)) - 1;
+                rainbow.position.x -= rainbowDispalcement;
                 break;
             case 10:
                 face.position.y++;
@@ -323,8 +316,7 @@ public class Nyancat {
                 poptart.position.y++;
                 tail.position.y++;
                 feet.position.y++;
-                rainbow.position.x += 9;
-                rainChunk.position.x -= (8 * (numRainChunks - 1)) - 1;
+                rainbow.position.x += rainbowDispalcement;
                 break;
         }
         frame--;
